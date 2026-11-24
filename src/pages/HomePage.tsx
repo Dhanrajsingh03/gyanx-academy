@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   TrendingUp,
   LineChart,
@@ -12,7 +11,7 @@ import {
   Star,
 } from "lucide-react";
 import { Link } from "@/lib/router";
-import { supabase, type Course, CATEGORIES } from "@/lib/supabase";
+import { COURSES, CATEGORIES } from "@/data/courses";
 import { CourseCard } from "@/components/CourseCard";
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
@@ -30,20 +29,10 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export function HomePage() {
-  const [featured, setFeatured] = useState<Course[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    (async () => {
-      const { data } = await supabase
-        .from("courses")
-        .select("*")
-        .eq("is_featured", true)
-        .order("students_count", { ascending: false });
-      setFeatured(data || []);
-      setLoading(false);
-    })();
-  }, []);
+  const featured = COURSES.filter((c) => c.is_featured).sort(
+    (a, b) => b.students_count - a.students_count
+  );
+  const loading = false;
 
   return (
     <div>

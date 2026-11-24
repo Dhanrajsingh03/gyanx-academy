@@ -1,6 +1,6 @@
 import { Star, Clock, PlayCircle, Users } from "lucide-react";
 import { Link } from "@/lib/router";
-import type { Course } from "@/lib/supabase";
+import type { Course } from "@/data/courses";
 
 export function CourseCard({ course }: { course: Course }) {
   const discount = course.original_price

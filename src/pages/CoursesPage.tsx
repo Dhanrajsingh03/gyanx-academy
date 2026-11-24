@@ -1,13 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search, SlidersHorizontal } from "lucide-react";
-import { supabase, type Course, CATEGORIES } from "@/lib/supabase";
+import { COURSES, CATEGORIES } from "@/data/courses";
 import { CourseCard } from "@/components/CourseCard";
 import { useRouter } from "@/lib/router";
 
 export function CoursesPage() {
   const { params } = useRouter();
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>(
     params.category || "All"
@@ -19,33 +17,26 @@ export function CoursesPage() {
     if (params.category) setSelectedCategory(params.category);
   }, [params.category]);
 
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      let query = supabase.from("courses").select("*");
-
-      if (selectedCategory !== "All") {
-        query = query.eq("category", selectedCategory);
-      }
-      if (selectedLevel !== "All") {
-        query = query.eq("level", selectedLevel);
-      }
-
-      if (sortBy === "popular") {
-        query = query.order("students_count", { ascending: false });
-      } else if (sortBy === "rating") {
-        query = query.order("rating", { ascending: false });
-      } else if (sortBy === "price-low") {
-        query = query.order("price", { ascending: true });
-      } else if (sortBy === "price-high") {
-        query = query.order("price", { ascending: false });
-      }
-
-      const { data } = await query;
-      setCourses(data || []);
-      setLoading(false);
-    })();
+  const courses = useMemo(() => {
+    let list = [...COURSES];
+    if (selectedCategory !== "All") {
+      list = list.filter((c) => c.category === selectedCategory);
+    }
+    if (selectedLevel !== "All") {
+      list = list.filter((c) => c.level === selectedLevel);
+    }
+    if (sortBy === "popular") {
+      list.sort((a, b) => b.students_count - a.students_count);
+    } else if (sortBy === "rating") {
+      list.sort((a, b) => b.rating - a.rating);
+    } else if (sortBy === "price-low") {
+      list.sort((a, b) => a.price - b.price);
+    } else if (sortBy === "price-high") {
+      list.sort((a, b) => b.price - a.price);
+    }
+    return list;
   }, [selectedCategory, selectedLevel, sortBy]);
+  const loading = false;
 
   const filtered = search
     ? courses.filter(

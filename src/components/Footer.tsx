@@ -1,6 +1,6 @@
 import { TrendingUp, Mail, Phone, MapPin } from "lucide-react";
 import { Link } from "@/lib/router";
-import { CATEGORIES } from "@/lib/supabase";
+import { CATEGORIES } from "@/data/courses";
 
 export function Footer() {
   return (

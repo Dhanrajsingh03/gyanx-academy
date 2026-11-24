@@ -13,47 +13,25 @@ import {
   Infinity as InfinityIcon,
   Smartphone,
 } from "lucide-react";
-import { supabase, type Course } from "@/lib/supabase";
+import { COURSES, type Course } from "@/data/courses";
 import { Link } from "@/lib/router";
 import { CourseCard } from "@/components/CourseCard";
 
 export function CourseDetailPage({ slug }: { slug: string }) {
-  const [course, setCourse] = useState<Course | null>(null);
-  const [related, setRelated] = useState<Course[]>([]);
-  const [loading, setLoading] = useState(true);
   const [openSections, setOpenSections] = useState<number[]>([0]);
   const [enrolled, setEnrolled] = useState(false);
 
+  const course: Course | null = COURSES.find((c) => c.slug === slug) ?? null;
+  const related: Course[] = course
+    ? COURSES.filter(
+        (c) => c.category === course.category && c.id !== course.id
+      ).slice(0, 3)
+    : [];
+
   useEffect(() => {
-    (async () => {
-      setLoading(true);
-      const { data } = await supabase
-        .from("courses")
-        .select("*")
-        .eq("slug", slug)
-        .maybeSingle();
-
-      if (data) {
-        setCourse(data as Course);
-        const { data: rel } = await supabase
-          .from("courses")
-          .select("*")
-          .eq("category", data.category)
-          .neq("id", data.id)
-          .limit(3);
-        setRelated((rel || []) as Course[]);
-      }
-      setLoading(false);
-    })();
+    setOpenSections([0]);
+    setEnrolled(false);
   }, [slug]);
-
-  if (loading) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-neutral-200 border-t-primary-600" />
-      </div>
-    );
-  }
 
   if (!course) {
     return (
